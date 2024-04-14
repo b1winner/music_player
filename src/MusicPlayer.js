@@ -1,75 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { Howl, Howler } from 'howler';
+import React, {useEffect, useRef} from 'react';
+import { Howl } from 'howler';
+import { useContext } from 'react';
+import { PlayerContext } from './components/PlayerContext';
+
 
 const MusicPlayer = ({ tracks }) => {
-    const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-    const [currentTrackName, setCurrentTrackName] = useState('');
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [sound, setSound] = useState(null);
-    const [progress, setProgress] = useState(0);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [totalTime, setTotalTime] = useState(0);
+    const { currentTrackIndex, setCurrentTrackIndex, isPlaying, setIsPlaying, sound, setSound, currentTrackName, setCurrentTrackName, progress, setProgress, currentTime, setCurrentTime, totalTime, setTotalTime } = useContext(PlayerContext);
     let progressInterval;
-
     useEffect(() => {
-        if (isPlaying) {
-            play();
+        if (sound) {
+            sound.unload();
+            setIsPlaying(false);
         }
-    }, [currentTrackIndex]);
-
-    const debounce = (func, delay) => {
-        let debounceTimer;
-        return function() {
-            const context = this;
-            const args = arguments;
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => func.apply(context, args), delay);
-        }
-    }
-
-   const play = () => {
-    if (!sound) {
         const newSound = new Howl({
             src: [tracks[currentTrackIndex]],
             onend: () => {
+                //clearInterval(progressInterval)
                 next();
+
             },
             onload: () => {
                 setTotalTime(newSound.duration());
             }
         });
-
         setSound(newSound);
-        newSound.play();
-        setIsPlaying(true);
         setCurrentTrackName(tracks[currentTrackIndex].split('/').pop().split('.')[0]);
+    }, [currentTrackIndex]);
 
-        progressInterval = setInterval(debounce(() => {
-            setProgress((newSound.seek() / newSound.duration()) * 100);
-            setCurrentTime(newSound.seek());
-        }, 500), 2000);
-    } else {
-        sound.play();
-        setIsPlaying(true);
+    useEffect(() => {
+        if (isPlaying) {
+            play();
+        } else {
+            pause();
+        }
+    }, [isPlaying]);
 
-        progressInterval = setInterval(debounce(() => {
-            setProgress((sound.seek() / sound.duration()) * 100);
-            setCurrentTime(sound.seek());
-        }, 500), 2000);
-    }
-};
+    const play = () => {
+        if (sound) {
+            sound.play();
+            setIsPlaying(true);
+            progressInterval = setInterval(() => {
+                if (sound.playing()) {
+                    setProgress((sound.seek() / sound.duration()) * 100);
+                    setCurrentTime(sound.seek());
+                }
+            }, 500);
+        }
+    };
 
     const pause = () => {
         if (sound) {
             sound.pause();
+            setIsPlaying(false);
+            clearInterval(progressInterval);
         }
-        setIsPlaying(false);
-        clearInterval(progressInterval);
     };
 
     const next = () => {
         if (sound) {
             sound.stop();
+            setIsPlaying(false);
             setSound(null);
         }
         setCurrentTrackIndex((currentTrackIndex + 1) % tracks.length);
@@ -79,6 +69,7 @@ const MusicPlayer = ({ tracks }) => {
     const prev = () => {
         if (sound) {
             sound.stop();
+            setIsPlaying(false);
             setSound(null);
         }
         setCurrentTrackIndex((currentTrackIndex - 1 + tracks.length) % tracks.length);
@@ -102,13 +93,13 @@ const MusicPlayer = ({ tracks }) => {
                 <div style={{width: `${progress}%`, height: '100%', backgroundColor: 'blue'}}></div>
             </div>
             <div>{formatTime(currentTime)} / {formatTime(totalTime)}</div>
-            <button onClick={prev}>Prev</button>
+            <button className="waves-effect waves-light btn" onClick={prev}>Prev</button>
             {isPlaying ? (
-                <button onClick={pause}>Pause</button>
+                <button className="btn-floating btn-large waves-effect waves-light red" onClick={pause}>Stop</button>
             ) : (
-                <button onClick={play}>Play</button>
+                <button className="btn-floating btn-large waves-effect waves-light red" onClick={play}>Play</button>
             )}
-            <button onClick={next}>Next</button>
+            <button className="waves-effect waves-light btn" onClick={next}>Next</button>
         </div>
     );
 };

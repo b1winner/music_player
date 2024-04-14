@@ -12,6 +12,7 @@ import SplitInSynapse from './Music/Split In Synapse.mp3';
 import TheEntertainer from './Music/The Entertainer.mp3';
 import VolatileReaction from './Music/Volatile Reaction.mp3';
 import WagonWheel from './Music/Wagon Wheel.mp3';
+import {PlayerProvider} from "./components/PlayerContext";
 
 
 
@@ -29,18 +30,20 @@ function App() {
         VolatileReaction,
         WagonWheel
     ];
-  return (
-      <BrowserRouter>
-        <div className="container">
-          <NavBar></NavBar>
-          <Routes>
-            <Route exact path="/" Component={Songs}></Route>
-            <Route path="/songs" Component={Songs}></Route>
-              <Route path="/player" element={<MusicPlayer tracks={tracks} />}></Route>
-          </Routes>
-        </div>
-      </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+            <PlayerProvider>
+                <div className="container">
+                    <NavBar></NavBar>
+                    <Routes>
+                        <Route exact path="/" element={<Songs tracks={tracks} />} />
+                        <Route path="/songs" element={<Songs tracks={tracks} />} />
+                        <Route path="/player/:trackIndex" element={<MusicPlayer tracks={tracks} />} />
+                    </Routes>
+                </div>
+            </PlayerProvider>
+        </BrowserRouter>
+    );
 }
 
 export default App;
