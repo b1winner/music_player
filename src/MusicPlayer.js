@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect} from 'react';
 import { Howl } from 'howler';
 import { useContext } from 'react';
 import { PlayerContext } from './components/PlayerContext';
@@ -39,21 +39,24 @@ const MusicPlayer = ({ tracks }) => {
         if (sound) {
             sound.play();
             setIsPlaying(true);
-            progressInterval = setInterval(() => {
-                if (sound.playing()) {
-                    setProgress((sound.seek() / sound.duration()) * 100);
-                    setCurrentTime(sound.seek());
-                }
-            }, 500);
+
         }
+        progressInterval = setInterval(() => {
+            if (sound.playing()) {
+                setProgress((sound.seek() / sound.duration()) * 100);
+                setCurrentTime(sound.seek());
+                console.log(sound.seek());
+            }
+        }, 500);
     };
 
     const pause = () => {
         if (sound) {
-            sound.pause();
+            sound.stop();
             setIsPlaying(false);
             clearInterval(progressInterval);
         }
+        clearInterval(progressInterval)
     };
 
     const next = () => {
