@@ -6,8 +6,11 @@ export const NavBar = () => {
     const { currentTrackIndex } = useContext(PlayerContext);
     return (
         <nav className="nav-wrapper red darken">
+            <ul className={"left"}>
+                <li><NavLink to="/">Music Player</NavLink></li>
+            </ul>
             <ul className="right">
-                <li><NavLink to="/">Songs</NavLink></li>
+            <li><NavLink to="/">Songs</NavLink></li>
                 <li><NavLink to="/player/${currentTrackIndex}">Player</NavLink></li>
             </ul>
         </nav>
